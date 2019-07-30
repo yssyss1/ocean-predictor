@@ -79,8 +79,8 @@ def download_finish(download_thread):
 
 start_year = 2000
 end_year = 2018
-ecmwf_id = 'soo2604@snu.ac.kr'
-ecmwf_pw = '0!tjrdudtn!0'
+ecmwf_id = None
+ecmwf_pw = None
 
 # Open WebBrowser
 driver = webdriver.Chrome()
