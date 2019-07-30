@@ -7,6 +7,7 @@ from requests import get
 import time
 from urllib.request import urlretrieve
 from threading import Thread
+import os
 
 """
 ECMWF의 서버 문제로 죽거나 가끔 페이지 로딩이 느려 delay 타임보다 초과되는 경우에 대해서 고려하지 않음
@@ -66,8 +67,9 @@ def http_response_check(url):
         request = get(url)
 
 
-def download_start(url, file_name):
-    urlretrieve(url, '/home/seok/nc_file/{}'.format(file_name))
+def download_start(url, save_path, file_name):
+    os.makedirs(save_path, exist_ok=True)
+    urlretrieve(url, os.path.join(save_path, '{}'.format(file_name)))
 
 
 def download_finish(download_thread):
@@ -77,7 +79,7 @@ def download_finish(download_thread):
 
 start_year = 2000
 end_year = 2018
-ecmwf_id = None
+ecmwf_id = 'soo2604@snu.ac.kr'
 ecmwf_pw = '0!tjrdudtn!0'
 
 # Open WebBrowser
@@ -151,7 +153,7 @@ for year in range(start_year, end_year+1):
 
         # Download nc file
         file_url = wait_and_get_element_css_selector(driver, '#jobresults > div > a').get_attribute('href')
-        download_thread = Thread(target=download_start, args=(file_url, '{}_{}.nc'.format(year, month)), name='{}_{} nc file'.format(year, month))
+        download_thread = Thread(target=download_start, args=(file_url, './', '{}_{}.nc'.format(year, month)), name='{}_{} nc file'.format(year, month))
         download_thread.start()
         download_finish_thread = Thread(target=download_finish, args=(download_thread,))
         download_finish_thread.start()
