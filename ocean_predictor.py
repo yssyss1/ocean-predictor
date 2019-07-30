@@ -133,48 +133,33 @@ class OceanPredictor:
         :param print_train_data: train 데이터에 대한 예측값, 실제값 비교 그래프와 mae를 계산여부 플래그
         :param batch_size: 배치 사이즈 ( 예측값 계산을 위한 배치사이즈 )
         """
-        x_test, y_test = self.get_data('test')
-        x_test = (np.array(x_test) - self.min_list) / (self.max_list - self.min_list)
-        y_test = (np.array(y_test) - self.min_list) / (self.max_list - self.min_list)
-        y_gt_arr = []
-        y_prediction_arr = []
+        prediction_data_label = ['test', 'train'] if print_train_data else ['test']
+        for data_label in tqdm(prediction_data_label):
+            x_data, y_data = self.get_data(data_label)
+            if data_label == 'train':
+                # 11680개가 8년치 데이터를 의미함. 4 * 365 * 8 = 11680. 전체 출력하면 너무 조밀해서 안보임.
+                x_data, y_data = x_data[-11680:], y_data[-11680:]
 
-        for batch_idx in tqdm(range(len(x_test) // batch_size)):
-            x_batch_test = x_test[batch_idx*batch_size:(batch_idx + 1)*batch_size]
-            y_gt_arr.append(y_test[batch_idx*batch_size:(batch_idx + 1)*batch_size])
-            y_prediction_arr.append(self.model.predict_on_batch(x_batch_test))
+            x_data = (np.array(x_data) - self.min_list) / (self.max_list - self.min_list)
+            y_data = (np.array(y_data) - self.min_list) / (self.max_list - self.min_list)
+            y_gt_arr = []
+            y_prediction_arr = []
 
-        y_gt_arr = np.array(y_gt_arr).reshape((-1, self.image_shape[0], self.image_shape[1], self.image_shape[2])) * (self.max_list - self.min_list) + self.min_list
-        y_prediction_arr = np.array(y_prediction_arr).reshape((-1, self.image_shape[0], self.image_shape[1], self.image_shape[2])) * (self.max_list - self.min_list) + self.min_list
+            for batch_idx in tqdm(range(len(x_data) // batch_size)):
+                x_batch_test = x_data[batch_idx * batch_size:(batch_idx + 1) * batch_size]
+                y_gt_arr.append(y_data[batch_idx * batch_size:(batch_idx + 1) * batch_size])
+                y_prediction_arr.append(self.model.predict_on_batch(x_batch_test))
 
-        for idx in tqdm(range(y_gt_arr.shape[-1])):
-            for y in range(0, self.image_shape[0]):
-                for x in range(0, self.image_shape[1]):
-                    self.plot_one_point(y_gt_arr[..., idx], y_prediction_arr[..., idx], y, x, '{}_{}_{}_test'.format(self.label[idx],  y, x), idx)
+            y_gt_arr = np.array(y_gt_arr).reshape((-1, self.image_shape[0], self.image_shape[1], self.image_shape[2])) * (
+                        self.max_list - self.min_list) + self.min_list
+            y_prediction_arr = np.array(y_prediction_arr).reshape(
+                (-1, self.image_shape[0], self.image_shape[1], self.image_shape[2])) * (
+                                           self.max_list - self.min_list) + self.min_list
 
-        self.calculate_mae_percent(y_prediction_arr, y_gt_arr, 'test')
-
-        if print_train_data:
-            x_train, y_train = self.get_data('train')
-            # 11680개가 8년치 데이터를 의미함. 4 * 365 * 8 = 11680. 전체 출력하면 너무 조밀해서 안보임.
-            x_train, y_train = x_train[-11680:], y_train[-11680:]
-            x_train = (np.array(x_train) - self.min_list) / (self.max_list - self.min_list)
-            y_train = (np.array(y_train) - self.min_list) / (self.max_list - self.min_list)
-
-            y_train_gt_arr = []
-            y_train_prediction_arr = []
-
-            for batch_idx in tqdm(range(len(x_train) // batch_size)):
-                x_batch_test = x_train[batch_idx*batch_size:(batch_idx + 1)*batch_size]
-                y_train_gt_arr.append(y_train[batch_idx*batch_size:(batch_idx + 1)*batch_size])
-                y_train_prediction_arr.append(self.model.predict_on_batch(x_batch_test))
-
-            y_train_gt_arr = np.array(y_train_gt_arr).reshape((-1, self.image_shape[0], self.image_shape[1], self.image_shape[2])) * (self.max_list - self.min_list) + self.min_list
-            y_train_prediction_arr = np.array(y_train_prediction_arr).reshape((-1, self.image_shape[0], self.image_shape[1], self.image_shape[2])) * (self.max_list - self.min_list) + self.min_list
-
-            for idx in tqdm(range(y_train_gt_arr.shape[-1])):
+            for idx in tqdm(range(y_gt_arr.shape[-1])):
                 for y in range(0, self.image_shape[0]):
                     for x in range(0, self.image_shape[1]):
-                        self.plot_one_point(y_train_gt_arr[..., idx], y_train_prediction_arr[..., idx], y, x, '{}_{}_{}_train'.format(self.label[idx],  y, x), idx)
+                        self.plot_one_point(y_gt_arr[..., idx], y_prediction_arr[..., idx], y, x,
+                                            '{}_{}_{}_{}'.format(self.label[idx], y, x, data_label), idx)
 
-            self.calculate_mae_percent(y_prediction_arr, y_gt_arr, 'train')
+            self.calculate_mae_percent(y_prediction_arr, y_gt_arr, data_label)
