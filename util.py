@@ -10,10 +10,10 @@ def build_hdf5(arr, save_path, data_label='data'):
     :param save_path: h5 저장 경로
     :param data_label: h5 파일로 저장할 때 label ( 저장하고 불러올 때 label로 동일한 이름을 사용해주면 됨 )
     """
-    os.makedirs(save_path, exist_ok=True)
-    hdf5_file = os.path.join(save_path, 'data.h5')
+    if not os.path.exists(os.path.dirname(save_path)):
+        os.makedirs(os.path.dirname(save_path))
 
-    with h5py.File(hdf5_file, 'w') as f:
+    with h5py.File(save_path, 'w') as f:
         f.create_dataset(data_label, data=arr)
 
 

@@ -35,6 +35,7 @@ class OceanPredictor:
         self.min_list = np.min(self.get_data('train')[0], axis=(0, 1, 2, 3))
         self.save_path = os.path.join('.', exp_name) if exp_name is not None else os.path.join('.', str(time.time()))
         self.label = label
+
         os.makedirs(self.save_path, exist_ok=True)
 
         if weight_path is not None:
@@ -92,18 +93,18 @@ class OceanPredictor:
         plt.legend()
         plt.savefig(os.path.join(save_path, '{}.png'.format(plot_name)))
 
-    def calculate_mae_percent(self, prediction, gt, label):
+    def calculate_mae_percent(self, prediction, gt, dataset_label):
         """
         원래 스케일, 정규화된 스케일에 대한 mae를 구해서 출력해주는 함수
         :param prediction: 예측값
         :param gt: 실제값
-        :param label: 데이터 종류 ( sst, u10, v10 ... )
+        :param dataset_label: 데이터 종류 ( train, validation, test ... )
         """
         mae_original = np.average(np.abs((prediction-gt)), axis=(0, 1, 2))
         prediction_normalize = (prediction - self.min_list) / (self.max_list - self.min_list)
         gt_normalize = (gt - self.min_list) / (self.max_list - self.min_list)
         mae_normalize = np.average(np.abs(prediction_normalize-gt_normalize), axis=(0, 1, 2))
-        print('{} result\n original scale: {} normalized scale: {}'.format(label, mae_original, mae_normalize))
+        print('{} result\n original scale: {} normalized scale: {}'.format(dataset_label, mae_original, mae_normalize))
 
     def compile(self, optimizer='adam', loss='mae'):
         """
@@ -116,7 +117,7 @@ class OceanPredictor:
     def train(self, batch, epochs):
         """
         train 데이터셋에 대해 모델을 학습시키는 함수.
-        h5로 읽은 데이터셋을 제너레이터를 통해 배치사이즈만큼 가져오는 형태로 만듦. 데이터셋이 클 경우 메모리에 다 올라가지 않는 경우를 방지하기 위함
+        .h5로 읽은 데이터셋을 제너레이터를 통해 배치사이즈만큼 가져오는 형태로 만듦. 데이터셋이 클 경우 메모리에 다 올라가지 않는 경우를 방지하기 위함
         train, validation 데이터셋에 대해 각각 제너레이터를 정의해서 keras 내부 함수인 fit_generator에 넣어줌
         :param batch: 배치 사이즈
         :param epochs: 전체 데이터셋에 대해 학습시키는 횟수
@@ -125,7 +126,8 @@ class OceanPredictor:
         x_validation, y_validation = self.get_data('validation')
         validation_gen = SimpleGenerator(x_validation, y_validation, batch, self.max_list, self.min_list)
         train_gen = SimpleGenerator(x_train, y_train, batch, self.max_list, self.min_list)
-        self.model.fit_generator(train_gen, len(train_gen), epochs=epochs, callbacks=[CustomCallback(self.model, self.save_path, validation_gen), ReduceLROnPlateau(monitor='loss')])
+        self.model.fit_generator(train_gen, len(train_gen), epochs=epochs, callbacks=[CustomCallback(self.model, self.save_path, validation_gen),
+                                                                                      ReduceLROnPlateau(monitor='loss')])
 
     def prediction(self, print_train_data=False, batch_size=10):
         """

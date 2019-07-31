@@ -6,6 +6,7 @@ import os
 from tqdm import tqdm
 import h5py
 import datetime
+from util import build_hdf5
 
 
 class ECMWFParser:
@@ -75,9 +76,6 @@ class ECMWFParser:
         :param latitude_range: 추출하고자 하는 위도 범위
         :param label: nc file에 저장된 데이터 라벨 ex) ['time', 'longitude', 'latitude', 'sst', 'swh', 'mwd', 'mwp', 'u10', 'v10']
         """
-        if not os.path.exists(os.path.dirname(save_path)):
-            os.makedirs(os.path.dirname(save_path))
-
         csv_file = open(csv_path, 'r')
         csv_reader = csv.reader(csv_file)
         initial_check = True # csv 라벨 정보 제외하기 위함
@@ -96,20 +94,18 @@ class ECMWFParser:
         arr = np.array(arr).reshape((longitude_length, latitude_length, -1, label_length))
         arr = arr.transpose((2, 0, 1, 3))
 
-        with h5py.File(save_path, 'w') as h5_f:
-            h5_f.create_dataset('data', data=arr)
-        csv_file.close()
+        build_hdf5(arr, save_path)
 
 
 if __name__ == '__main__':
-    ECMWFParser.ecmwf_parsing_to_csv('/home/seok/abcd/ecmwf_all.csv',
-                                     '/home/seok/ncnc',
+    ECMWFParser.ecmwf_parsing_to_csv('./ecmwf_all.csv',
+                                     '/home/seok/nc_file',
                                      (160, 162),
                                      (71, 73),
                                      ['time', 'longitude', 'latitude', 'sst', 'swh', 'mwd', 'mwp', 'u10', 'v10']
                                      )
 
-    ECMWFParser.csv_to_h5('/home/seok/abcd/ecmwf_all.csv',
+    ECMWFParser.csv_to_h5('./ecmwf_all.csv',
                           './ecmwf.h5',
                           (160, 162),
                           (71, 73),

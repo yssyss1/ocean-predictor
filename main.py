@@ -24,9 +24,6 @@ if __name__ == '__main__':
     loss = 'mse'
     model_type = 'ae_convlstm_model'
 
-    batch_per_epoch = sample_length - look_back
-    batch_size = batch_size if batch_size <= batch_per_epoch else batch_per_epoch
-
     predictor = OceanPredictor(model_type=model_type,
                                input_shape=(batch_size, look_back, sample_height, sample_width, channel),
                                look_back=look_back,
