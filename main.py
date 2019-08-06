@@ -15,6 +15,8 @@ if __name__ == '__main__':
     with open(hyperparameter_json_path) as json_file:
         """
         주의 - json은 문자를 표현할 때 작은 따옴표(')를 못 씀, 큰 따옴표(")만 사용 가능함 
+        
+        Hyperparameter는 hyperparameter_json_path에 위치한 json파일 내부 변수에서 세팅하면 됨
 
         null로 주어져도 되는 것들 (python에서 로드될 때는 null이 None으로 변환됨)
             exp_name => null로 주어질 경우 현재 시간을 root 폴더 이름으로 사용함 
@@ -37,6 +39,9 @@ if __name__ == '__main__':
         만약 특정 속성만 학습을 할 경우 다음과 같이 slicing하면 됨. label은 slicing된 데이터에 맞춰서 넘겨줘야 함
             dataset = dataset[..., :3]
             label = ['sst', 'swh', 'mwd']
+
+        Train, Validation, Test는 전체 데이터셋에서 93%, 4%, 3% 비율로 split해서 사용하고 있음
+        각 비율을 바꾸려면 util.py의 dataset_split 함수 인자를 바꾸기 바람
         """
         json_data = json.load(json_file)  # 학습에 사용할 Hyperparameter를 담고있는 json파일을 로드
         exp_name = json_data['exp_name']  # experiment 이름; 학습시 weight, loss curve, prediction 결과를 저장하기 위한 root 폴더 이름
@@ -71,7 +76,7 @@ if __name__ == '__main__':
     os.makedirs(save_path)
     shutil.copy2(hyperparameter_json_path, os.path.join(save_path, os.path.basename(hyperparameter_json_path)))
 
-    if only_prediction and weight_path is None:
+    if only_prediction and weight_path == None:
         raise ValueError('For prediction, pretrained weights need to be given!')
 
     predictor = OceanPredictor(model_type=model_type,

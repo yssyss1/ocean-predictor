@@ -12,5 +12,5 @@
   "model_type": "ae_convlstm_model",
   "random_seed": 5,
   "weight_path": "model_weights_0_epoch.h5",
-  "only_prediction": true
+  "only_prediction": false
 }

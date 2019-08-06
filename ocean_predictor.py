@@ -8,7 +8,6 @@ from data_generator import SimpleGenerator
 from keras.callbacks import ReduceLROnPlateau
 from keras.utils import plot_model
 from save_callback import CustomCallback
-import time
 
 
 class OceanPredictor:
@@ -142,7 +141,6 @@ class OceanPredictor:
             if data_label == 'train':
                 # 11680개가 8년치 데이터를 의미함. 4 * 365 * 8 = 11680. 전체 출력하면 너무 조밀해서 안보임.
                 x_data, y_data = x_data[-11680:], y_data[-11680:]
-            x_data, y_data = x_data[:300], y_data[:300]
             x_data = (np.array(x_data) - self.min_list) / (self.max_list - self.min_list)
             y_data = (np.array(y_data) - self.min_list) / (self.max_list - self.min_list)
             y_gt_arr = []

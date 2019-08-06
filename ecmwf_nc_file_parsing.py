@@ -4,7 +4,6 @@ import csv
 from glob import glob
 import os
 from tqdm import tqdm
-import h5py
 import datetime
 from util import build_hdf5
 
@@ -78,7 +77,7 @@ class ECMWFParser:
         """
         csv_file = open(csv_path, 'r')
         csv_reader = csv.reader(csv_file)
-        initial_check = True # csv 라벨 정보 제외하기 위함
+        initial_check = True  # csv 라벨 정보 제외하기 위함
         arr = []
         longitude_length = longitude_range[1] - longitude_range[0] + 1
         latitude_length = latitude_range[1] - latitude_range[0] + 1
@@ -88,7 +87,7 @@ class ECMWFParser:
                 initial_check = False
                 continue
             single_arr = np.array(line[3:])
-            single_arr[single_arr == '--'] = '0' # 결손치, 육지는 '--'로 표시됨. 향후 0 보다 학습에 영향을 안주는 값으로 변경해야 함
+            single_arr[single_arr == '--'] = '0'  # 결손치, 육지는 '--'로 표시됨. 향후 0 보다 학습에 영향을 안주는 값으로 변경해야 함
             arr.append(single_arr.astype('float32'))
         # 시간, 경도, 위도, 데이터 순으로 데이터셋을 정렬함
         arr = np.array(arr).reshape((longitude_length, latitude_length, -1, label_length))
