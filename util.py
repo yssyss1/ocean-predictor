@@ -44,12 +44,12 @@ def dataset_split(dataset,
     dataset_arr = []
 
     for ratio in [train_dataset_range, validation_dataset_range, test_dataset_range]:
-        split_dataset = dataset[int(dataset_len*ratio[0]):int(dataset_len*ratio[1])]
+        split_dataset = dataset[int(dataset_len * ratio[0]):int(dataset_len * ratio[1])]
         dataset_x, dataset_y = [], []
 
         for idx in range(len(split_dataset) - look_back - look_forward):
-            dataset_x.append(split_dataset[idx:(idx+look_back)])
-            dataset_y.append(split_dataset[idx+look_back+look_forward-1])
+            dataset_x.append(split_dataset[idx:(idx + look_back)])
+            dataset_y.append(split_dataset[idx + look_back + look_forward - 1])
 
         dataset_arr.append(dataset_x)
         dataset_arr.append(dataset_y)

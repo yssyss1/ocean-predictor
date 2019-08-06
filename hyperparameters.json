@@ -1,0 +1,15 @@
+{
+  "exp_name": "sst_text",
+  "data_path": "./data_all.h5",
+  "label": ["sst", "swh", "mwd", "mwp", "u10", "v10"],
+  "look_back": 240,
+  "look_forward": 60,
+  "batch_size": 256,
+  "epoch": 1,
+  "optimizer_lr": 1e-2,
+  "oprtimizer_lr_decay": 1e-3,
+  "loss": "mse",
+  "model_type": "ae_convlstm_model",
+  "random_seed": 5,
+  "weight_path": null
+}

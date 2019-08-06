@@ -13,28 +13,29 @@ def ae_convlstm_model(input_shape, output_channel):
     input = Input(shape=input_shape[1:])
     input_reshape = Lambda(lambda x: K.permute_dimensions(x, (0, 4, 2, 3, 1)))(input)
 
-    encoder_1 = Conv3D(filters=input_shape[1]//2, kernel_size=(1, 5, 5), padding='same', activation='relu')(input_reshape)
+    encoder_1 = Conv3D(filters=input_shape[1] // 2, kernel_size=(1, 5, 5), padding='same', activation='relu')(
+        input_reshape)
     encoder_1 = BatchNormalization()(encoder_1)
-    encoder_2 = Conv3D(filters=input_shape[1]//4, kernel_size=(1, 5, 5), padding='same', activation='relu')(encoder_1)
+    encoder_2 = Conv3D(filters=input_shape[1] // 4, kernel_size=(1, 5, 5), padding='same', activation='relu')(encoder_1)
 
-    decoder_1 = Conv3D(filters=input_shape[1]//2, kernel_size=(1, 5, 5), padding='same', activation='relu')(encoder_2)
+    decoder_1 = Conv3D(filters=input_shape[1] // 2, kernel_size=(1, 5, 5), padding='same', activation='relu')(encoder_2)
     decoder_1 = BatchNormalization()(decoder_1)
     decoder_2 = Conv3D(filters=input_shape[1], kernel_size=(1, 5, 5), padding='same', activation='sigmoid')(decoder_1)
 
     decoder_2_reshape = Lambda(lambda x: K.permute_dimensions(x, (0, 4, 2, 3, 1)))(decoder_2)
 
     conv_lstm = ConvLSTM2D(filters=12,
-                            kernel_size=(5, 5),
-                            padding='same',
-                            return_sequences=True,
-                            stateful=False)(decoder_2_reshape)
+                           kernel_size=(5, 5),
+                           padding='same',
+                           return_sequences=True,
+                           stateful=False)(decoder_2_reshape)
     conv_lstm = BatchNormalization()(conv_lstm)
 
     conv_lstm = ConvLSTM2D(filters=12,
-                            kernel_size=(5, 5),
-                            padding='same',
-                            return_sequences=False,
-                            stateful=False)(conv_lstm)
+                           kernel_size=(5, 5),
+                           padding='same',
+                           return_sequences=False,
+                           stateful=False)(conv_lstm)
 
     output = Conv2D(filters=output_channel,
                     kernel_size=(5, 5),

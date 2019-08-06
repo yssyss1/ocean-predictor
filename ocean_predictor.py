@@ -12,7 +12,7 @@ import time
 
 
 class OceanPredictor:
-    def __init__(self, model_type, input_shape, look_back, look_forward, dataset, label, weight_path=None, exp_name=None, model_to_png=True):
+    def __init__(self, model_type, input_shape, look_back, look_forward, dataset, label, save_path, weight_path=None):
         """
         :param model_type: 생성할 모델 종류
         :param input_shape: 입력 데이터 사이즈
@@ -20,9 +20,8 @@ class OceanPredictor:
         :param look_forward: 예측하고자하는 값의 범위 ( 과거 몇 개의 데이터를 이용해 미래를 예측할 때 '미래'에 해당하는 길이 )
         :param dataset: 전체 데이터셋 ( train, validation, test split하지 않은 전체 데이터셋 )
         :param label: 데이터셋 라벨 ( sst, u10, v10 ... )
+        :param save_path: 학습시 weight, loss curve, prediction 결과를 저장하기 위한 root 폴더
         :param weight_path: load할 weight 경로 - 없다면 처음부터 학습
-        :param exp_name: experiment 이름 - 학습시 weight, loss curve, prediction 결과를 저장하기 위한 root folder로 없다면 현재 시각으로 폴더가 생성됨
-        :param model_to_png: 생성된 모델을 png파일로 출력할지에 대한 플래그
         """
         self.model_type = model_type
         self.input_shape = input_shape
@@ -33,10 +32,11 @@ class OceanPredictor:
         self.dataset_arr = dataset_split(dataset, look_back, look_forward)
         self.max_list = np.max(self.get_data('train')[0], axis=(0, 1, 2, 3))
         self.min_list = np.min(self.get_data('train')[0], axis=(0, 1, 2, 3))
-        self.save_path = os.path.join('.', exp_name) if exp_name is not None else os.path.join('.', str(time.time()))
+        self.save_path = save_path
         self.label = label
 
         os.makedirs(self.save_path, exist_ok=True)
+        plot_model(self.model, os.path.join(self.save_path, 'model.png'), show_shapes=True)
 
         if weight_path is not None:
             if not os.path.exists(weight_path):
@@ -44,9 +44,6 @@ class OceanPredictor:
 
             print("Load weight from {}".format(weight_path))
             self.model.load_weights(weight_path)
-
-        if model_to_png:
-            plot_model(self.model, os.path.join(self.save_path, 'model.png'), show_shapes=True)
 
     def build_model(self):
         """
