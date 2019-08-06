@@ -1,5 +1,5 @@
 {
-  "exp_name": "sst_text",
+  "exp_name": "sst",
   "data_path": "./data_all.h5",
   "label": ["sst", "swh", "mwd", "mwp", "u10", "v10"],
   "look_back": 240,

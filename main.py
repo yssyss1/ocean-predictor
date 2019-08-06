@@ -57,7 +57,7 @@ if __name__ == '__main__':
     if os.path.exists(save_path):
         raise FileExistsError('Check your exp_name. It\'s duplicated!')
     os.makedirs(save_path)
-    shutil.copyfile(hyperparameter_json_path, save_path)
+    shutil.copy2(hyperparameter_json_path, os.path.join(save_path, os.path.basename(hyperparameter_json_path)))
 
     predictor = OceanPredictor(model_type=model_type,
                                input_shape=(batch_size, look_back, sample_height, sample_width, channel),
