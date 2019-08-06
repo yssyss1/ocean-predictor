@@ -1,5 +1,5 @@
 from predictor_model import ae_convlstm_model, naive_convlstm_model
-from util import dataset_split, is_exist
+from util import dataset_split, is_exist, txt_write_and_print
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -87,18 +87,25 @@ class OceanPredictor:
         plt.legend()
         plt.savefig(os.path.join(save_path, '{}.png'.format(plot_name)))
 
-    def calculate_mae_percent(self, prediction, gt, dataset_label):
+    def calculate_mae_percent(self, prediction, gt, dataset_label, label):
         """
         원래 스케일, 정규화된 스케일에 대한 mae를 구해서 출력해주는 함수
         :param prediction: 예측값
         :param gt: 실제값
-        :param dataset_label: 데이터 종류 ( train, validation, test ... )
+        :param dataset_label: 데이터 범주 ( train, validation, test ... )
+        :param label: 데이터 종류 ( sst, u10, v10 ... )
         """
         mae_original = np.average(np.abs((prediction-gt)), axis=(0, 1, 2))
         prediction_normalize = (prediction - self.min_list) / (self.max_list - self.min_list)
         gt_normalize = (gt - self.min_list) / (self.max_list - self.min_list)
         mae_normalize = np.average(np.abs(prediction_normalize-gt_normalize), axis=(0, 1, 2))
-        print('{} result\n original scale: {} normalized scale: {}'.format(dataset_label, mae_original, mae_normalize))
+        f = open(os.path.join(self.save_path, 'result_mae.txt'), 'a')
+        txt_write_and_print(f, '{} result'.format(dataset_label))
+        txt_write_and_print(f, 'order: {}'.format(label))
+        txt_write_and_print(f, 'original scale: {}'.format(mae_original))
+        txt_write_and_print(f, 'normalized scale: {}'.format(mae_normalize))
+        txt_write_and_print(f, '\n\n\n')
+        f.close()
 
     def compile(self, optimizer='adam', loss='mae'):
         """
@@ -135,7 +142,7 @@ class OceanPredictor:
             if data_label == 'train':
                 # 11680개가 8년치 데이터를 의미함. 4 * 365 * 8 = 11680. 전체 출력하면 너무 조밀해서 안보임.
                 x_data, y_data = x_data[-11680:], y_data[-11680:]
-
+            x_data, y_data = x_data[:300], y_data[:300]
             x_data = (np.array(x_data) - self.min_list) / (self.max_list - self.min_list)
             y_data = (np.array(y_data) - self.min_list) / (self.max_list - self.min_list)
             y_gt_arr = []
@@ -158,4 +165,4 @@ class OceanPredictor:
                         self.plot_one_point(y_gt_arr[..., idx], y_prediction_arr[..., idx], y, x,
                                             '{}_{}_{}_{}'.format(self.label[idx], y, x, data_label), idx)
 
-            self.calculate_mae_percent(y_prediction_arr, y_gt_arr, data_label)
+            self.calculate_mae_percent(y_prediction_arr, y_gt_arr, data_label, self.label)

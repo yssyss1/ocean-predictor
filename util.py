@@ -10,8 +10,7 @@ def build_hdf5(arr, save_path, data_label='data'):
     :param save_path: h5 저장 경로
     :param data_label: h5 파일로 저장할 때 label ( 저장하고 불러올 때 label로 동일한 이름을 사용해주면 됨 )
     """
-    if not os.path.exists(os.path.dirname(save_path)):
-        os.makedirs(os.path.dirname(save_path))
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     with h5py.File(save_path, 'w') as f:
         f.create_dataset(data_label, data=arr)
@@ -24,8 +23,7 @@ def load_data(path, data_label='data'):
     :param data_label: h5 파일에서 불러오고자 하는 데이터 라벨
     :return:
     """
-    if not os.path.exists(path):
-        raise FileNotFoundError('Check your data path!')
+    is_exist(path, 'dataset')
 
     with h5py.File(path, 'r') as f:
         return f[data_label][:].astype(np.float32)
@@ -58,5 +56,16 @@ def dataset_split(dataset,
 
 
 def is_exist(file_path, file_name):
+    """
+    File이 존재하지 않을 경우 에러를 내는 함수
+    """
     if not os.path.exists(file_path):
         raise FileNotFoundError('{} is not found!'.format(file_name))
+
+
+def txt_write_and_print(txt_file, s):
+    """
+    Txt file에 문자열을 저장하고 콘솔에 출력하는 함수
+    """
+    txt_file.write(s+'\n')
+    print(s)
