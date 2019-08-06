@@ -55,3 +55,8 @@ def dataset_split(dataset,
         dataset_arr.append(dataset_y)
 
     return dataset_arr
+
+
+def is_exist(file_path, file_name):
+    if not os.path.exists(file_path):
+        raise FileNotFoundError('{} is not found!'.format(file_name))

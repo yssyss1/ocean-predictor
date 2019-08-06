@@ -1,6 +1,6 @@
 from ocean_predictor import OceanPredictor
 from keras.optimizers import Adam
-from util import load_data
+from util import load_data, is_exist
 import numpy as np
 import json
 import os
@@ -10,6 +10,8 @@ import shutil
 
 if __name__ == '__main__':
     hyperparameter_json_path = './hyperparameters.json'
+    is_exist(hyperparameter_json_path, 'hyperparameter json file')
+
     with open(hyperparameter_json_path) as json_file:
         """
         주의 - json은 문자를 표현할 때 작은 따옴표(')를 못 씀, 큰 따옴표(")만 사용 가능함 
@@ -38,11 +40,10 @@ if __name__ == '__main__':
         weight_path = json_data['weight_path']  # 로드할 weight 경로
         random_seed = json_data['random_seed']  # weight initialize를 동일하게 하기 위한 seed 값
 
-    if random_seed is not None:
+    if random_seed is not None and type(random_seed) is int:
         np.random.seed(random_seed)
 
-    if not os.path.exists(data_path):
-        raise FileNotFoundError('{} is not found!'.format(data_path))
+    is_exist(data_path, 'dataset file')
 
     dataset = load_data(data_path)
     sample_length, sample_height, sample_width, channel = dataset.shape

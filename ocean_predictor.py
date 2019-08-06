@@ -1,5 +1,5 @@
 from predictor_model import ae_convlstm_model, naive_convlstm_model
-from util import dataset_split
+from util import dataset_split, is_exist
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -35,13 +35,10 @@ class OceanPredictor:
         self.save_path = save_path
         self.label = label
 
-        os.makedirs(self.save_path, exist_ok=True)
         plot_model(self.model, os.path.join(self.save_path, 'model.png'), show_shapes=True)
 
         if weight_path is not None:
-            if not os.path.exists(weight_path):
-                raise FileNotFoundError('{} is not exist!'.format(weight_path))
-
+            is_exist(weight_path, 'weight file')
             print("Load weight from {}".format(weight_path))
             self.model.load_weights(weight_path)
 
