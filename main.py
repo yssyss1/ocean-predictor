@@ -76,7 +76,7 @@ if __name__ == '__main__':
     os.makedirs(save_path)
     shutil.copy2(hyperparameter_json_path, os.path.join(save_path, os.path.basename(hyperparameter_json_path)))
 
-    if only_prediction and weight_path == None:
+    if only_prediction and weight_path is None:
         raise ValueError('For prediction, pretrained weights need to be given!')
 
     predictor = OceanPredictor(model_type=model_type,
